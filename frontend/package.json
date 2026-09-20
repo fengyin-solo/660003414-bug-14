@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite --host",
     "build": "vue-tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "verify:state": "esbuild scripts/verify-state.ts --bundle --platform=node --format=esm --outfile=node_modules/.verify-state.mjs --log-level=warning && node node_modules/.verify-state.mjs"
   },
   "dependencies": {
     "vue": "^3.4.0",

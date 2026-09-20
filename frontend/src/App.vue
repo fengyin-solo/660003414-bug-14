@@ -2,94 +2,86 @@
   <div class="min-h-screen bg-slate-900 text-slate-200">
     <header class="border-b border-slate-700 px-6 py-4">
       <h1 class="text-2xl font-bold text-cyan-400">语言词源图谱与多语系演化追踪</h1>
-      <p class="text-sm text-slate-500 mt-1">D3.js力导向图 · 印欧语系演化 · 同源词对照 · 500+词根</p>
+      <p class="text-sm text-slate-500 mt-1">D3.js力导向图 · 印欧语系演化 · 同源词对照 · 音变推演 · 500+词根</p>
     </header>
+
+    <!-- 页面切换：规则面板 <-> 词表页面。切换不重置任何推演状态 -->
+    <div class="px-4 pt-4">
+      <div class="inline-flex rounded-lg border border-slate-700 overflow-hidden">
+        <button
+          class="px-4 py-2 text-sm transition-colors"
+          :class="sound.activePage === 'rule' ? 'bg-cyan-700 text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'"
+          @click="sound.switchPage('rule')"
+        >规则面板</button>
+        <button
+          class="px-4 py-2 text-sm transition-colors"
+          :class="sound.activePage === 'words' ? 'bg-cyan-700 text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'"
+          @click="sound.switchPage('words')"
+        >词表页面</button>
+      </div>
+    </div>
+
     <div class="p-4 space-y-4">
-      <div class="grid lg:grid-cols-3 gap-4">
-        <div class="lg:col-span-2 bg-slate-800 rounded-lg p-4 border border-slate-700">
-          <div class="flex items-center justify-between mb-3">
-            <h3 class="text-sm font-bold text-slate-400">词源力导向网络</h3>
-            <div class="flex gap-3 text-xs">
-              <span v-for="f in LANGUAGE_FAMILIES" :key="f.id" class="flex items-center gap-1">
-                <span class="w-3 h-3 rounded-full" :style="{backgroundColor: f.color}"></span>{{ f.name }}
-              </span>
+      <!-- 规则面板页：力导向图 + 音变推演 -->
+      <template v-if="sound.activePage === 'rule'">
+        <div class="grid lg:grid-cols-3 gap-4">
+          <div class="lg:col-span-2 bg-slate-800 rounded-lg p-4 border border-slate-700">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="text-sm font-bold text-slate-400">词源力导向网络</h3>
+              <div class="flex gap-3 text-xs">
+                <span v-for="f in LANGUAGE_FAMILIES" :key="f.id" class="flex items-center gap-1">
+                  <span class="w-3 h-3 rounded-full" :style="{backgroundColor: f.color}"></span>{{ f.name }}
+                </span>
+              </div>
             </div>
+            <svg ref="svgRef" class="w-full bg-slate-900 rounded" style="height:460px"></svg>
           </div>
-          <svg ref="svgRef" class="w-full bg-slate-900 rounded" style="height:460px"></svg>
-        </div>
-        <div class="space-y-4">
-          <div class="bg-slate-800 rounded-lg p-4 border border-slate-700">
-            <h3 class="text-sm font-bold text-slate-400 mb-3">语系概览</h3>
-            <div class="space-y-2">
-              <div v-for="f in LANGUAGE_FAMILIES" :key="f.id" class="flex items-start gap-2 text-sm">
-                <span class="w-3 h-3 rounded-full mt-0.5 flex-shrink-0" :style="{backgroundColor: f.color}"></span>
-                <div><div class="font-bold">{{ f.name }}</div><div class="text-xs text-slate-500">{{ f.era }} · {{ f.languages.join('/') }}</div></div>
+          <div class="space-y-4">
+            <div class="bg-slate-800 rounded-lg p-4 border border-slate-700">
+              <h3 class="text-sm font-bold text-slate-400 mb-3">语系概览</h3>
+              <div class="space-y-2">
+                <div v-for="f in LANGUAGE_FAMILIES" :key="f.id" class="flex items-start gap-2 text-sm">
+                  <span class="w-3 h-3 rounded-full mt-0.5 flex-shrink-0" :style="{backgroundColor: f.color}"></span>
+                  <div><div class="font-bold">{{ f.name }}</div><div class="text-xs text-slate-500">{{ f.era }} · {{ f.languages.join('/') }}</div></div>
+                </div>
+              </div>
+            </div>
+            <div v-if="store.selectedNode" class="bg-slate-800 rounded-lg p-4 border border-slate-700">
+              <h3 class="text-sm font-bold text-slate-400 mb-2">选中节点</h3>
+              <div class="text-lg font-bold text-cyan-400">{{ store.selectedNode.word }}</div>
+              <div class="text-sm text-slate-400">{{ store.selectedNode.language }} — {{ store.selectedNode.meaning }}</div>
+            </div>
+            <div class="bg-slate-800 rounded-lg p-4 border border-slate-700 text-xs text-slate-400">
+              <h3 class="text-sm font-bold text-slate-400 mb-2">Grimm定律</h3>
+              <div class="space-y-1">
+                <div class="bg-slate-900 rounded p-2"><span class="text-cyan-400">p→f: </span>pater → father</div>
+                <div class="bg-slate-900 rounded p-2"><span class="text-green-400">t→θ: </span>tres → three</div>
+                <div class="bg-slate-900 rounded p-2"><span class="text-orange-400">k→h: </span>cord → heart</div>
               </div>
             </div>
           </div>
-          <div v-if="store.selectedNode" class="bg-slate-800 rounded-lg p-4 border border-slate-700">
-            <h3 class="text-sm font-bold text-slate-400 mb-2">选中节点</h3>
-            <div class="text-lg font-bold text-cyan-400">{{ store.selectedNode.word }}</div>
-            <div class="text-sm text-slate-400">{{ store.selectedNode.language }} — {{ store.selectedNode.meaning }}</div>
-          </div>
-          <div class="bg-slate-800 rounded-lg p-4 border border-slate-700 text-xs text-slate-400">
-            <h3 class="text-sm font-bold text-slate-400 mb-2">Grimm定律</h3>
-            <div class="space-y-1">
-              <div class="bg-slate-900 rounded p-2"><span class="text-cyan-400">p→f: </span>pater → father</div>
-              <div class="bg-slate-900 rounded p-2"><span class="text-green-400">t→θ: </span>tres → three</div>
-              <div class="bg-slate-900 rounded p-2"><span class="text-orange-400">k→h: </span>cord → heart</div>
-            </div>
-          </div>
         </div>
-      </div>
-      <div class="bg-slate-800 rounded-lg p-4 border border-slate-700">
-        <h3 class="text-sm font-bold text-slate-400 mb-3">同源词对照表</h3>
-        <div class="flex gap-2 mb-3">
-          <input v-model="store.searchQuery" placeholder="搜索词根/含义..." class="flex-1 bg-slate-900 border border-slate-600 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-cyan-500" />
-          <select v-model="store.selectedFamily" class="bg-slate-900 border border-slate-600 rounded px-2 text-sm text-slate-300">
-            <option value="all">全部语系</option>
-            <option v-for="f in LANGUAGE_FAMILIES" :key="f.id" :value="f.id">{{ f.name }}</option>
-          </select>
-        </div>
-        <div class="overflow-x-auto max-h-64 overflow-y-auto">
-          <table class="w-full text-xs">
-            <thead class="sticky top-0 bg-slate-700">
-              <tr>
-                <th class="px-2 py-2 text-left text-slate-300">词根</th>
-                <th class="px-2 py-2 text-left text-slate-300">含义</th>
-                <th class="px-2 py-2 text-left text-cyan-400">英语</th>
-                <th class="px-2 py-2 text-left text-blue-400">法语</th>
-                <th class="px-2 py-2 text-left text-green-400">德语</th>
-                <th class="px-2 py-2 text-left text-orange-400">西班牙语</th>
-                <th class="px-2 py-2 text-left text-purple-400">俄语</th>
-                <th class="px-2 py-2 text-left text-yellow-400">拉丁语</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="cs in store.filteredCognates" :key="cs.root" class="border-t border-slate-700 hover:bg-slate-700">
-                <td class="px-2 py-1.5 font-mono text-slate-200 font-bold">{{ cs.root }}</td>
-                <td class="px-2 py-1.5 text-slate-400">{{ cs.meaning }}</td>
-                <td class="px-2 py-1.5 font-mono text-cyan-300">{{ cs.languages['英语'] || '—' }}</td>
-                <td class="px-2 py-1.5 font-mono text-blue-300">{{ cs.languages['法语'] || '—' }}</td>
-                <td class="px-2 py-1.5 font-mono text-green-300">{{ cs.languages['德语'] || '—' }}</td>
-                <td class="px-2 py-1.5 font-mono text-orange-300">{{ cs.languages['西班牙语'] || '—' }}</td>
-                <td class="px-2 py-1.5 font-mono text-purple-300">{{ cs.languages['俄语'] || '—' }}</td>
-                <td class="px-2 py-1.5 font-mono text-yellow-300">{{ cs.languages['拉丁语'] || '—' }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+
+        <!-- 音变规则面板 / 推演面板（每条推演独立持久化） -->
+        <SoundRulePanel />
+      </template>
+
+      <!-- 词表页面：离开再返回，推演状态在 store 中保持 -->
+      <WordListPage v-else />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import * as d3 from 'd3'
 import { useEtymologyStore, LANGUAGE_FAMILIES } from './store/etymology'
+import { useSoundChangeStore } from './store/soundChange'
+import SoundRulePanel from './components/SoundRulePanel.vue'
+import WordListPage from './components/WordListPage.vue'
 
 const store = useEtymologyStore()
+const sound = useSoundChangeStore()
 const svgRef = ref<SVGSVGElement | null>(null)
 const COLORS: Record<string, string> = { ie: '#3b82f6', st: '#22c55e', aa: '#f59e0b', ural: '#8b5cf6' }
 
@@ -130,4 +122,9 @@ function drawGraph() {
 }
 
 onMounted(() => { setTimeout(drawGraph, 100) })
+
+// 切回规则页时 svg 重新挂载，需要重绘（推演状态本身不依赖此逻辑）
+watch(() => sound.activePage, (p) => {
+  if (p === 'rule') setTimeout(drawGraph, 100)
+})
 </script>
